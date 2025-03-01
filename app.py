@@ -1,31 +1,27 @@
-#import streamlit as st
-#selection = st.selectbox(label = "Select One", options =["papu", "chapu","tapu"], index=0)
-#st.write(selection)
-
-
 import streamlit as st
 from pptx import Presentation
 
-# Streamlit App Title
 st.title("PowerPoint Slide Viewer with Notes")
 
-# File Upload
 uploaded_file = st.file_uploader("Upload a PowerPoint file (.pptx)", type=["pptx"])
 
 if uploaded_file:
-    # Load Presentation
     prs = Presentation(uploaded_file)
     
-    # Extract slides and notes
-    slides = {f"Slide {i+1}": slide.notes_slide.text.strip() if slide.has_notes_slide else "No notes available" for i, slide in enumerate(prs.slides)}
-    
+    # Create a dictionary of slide labels and their corresponding notes.
+    slides = {}
+    for i, slide in enumerate(prs.slides):
+        slide_label = f"Slide {i+1}"
+        if slide.has_notes_slide:
+            # Access notes text via the notes_text_frame property
+            notes_text = slide.notes_slide.notes_text_frame.text.strip()
+        else:
+            notes_text = "No notes available"
+        slides[slide_label] = notes_text
+
     if slides:
-        # Dropdown for Slide Selection
         selected_slide = st.selectbox("Select a Slide", list(slides.keys()))
-        
-        # Display Notes
-        if selected_slide:
-            st.subheader("Slide Notes")
-            st.write(slides[selected_slide])
+        st.subheader("Slide Notes")
+        st.write(slides[selected_slide])
     else:
         st.warning("No slides found in the uploaded PowerPoint.")
